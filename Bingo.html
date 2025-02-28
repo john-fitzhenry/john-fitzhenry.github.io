@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Syracuse University Campus Bingo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --syracuse-orange: #D44500;
+      --syracuse-blue: #0033A0;
+      --light-bg: #f9f9f9;
+      --medium-bg: #e0e0e0;
+    }
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(135deg, var(--light-bg), var(--medium-bg));
+      margin: 0;
+      padding: 20px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    h1 {
+      text-align: center;
+      color: var(--syracuse-orange);
+      margin-bottom: 5px;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: var(--syracuse-blue);
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+    }
+    
+    .instructions {
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .instructions h3 {
+      margin-top: 0;
+      color: var(--syracuse-blue);
+    }
+    
+    .instructions ol {
+      margin: 0;
+      padding-left: 20px;
+    }
+    
+    .bingo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    button {
+      background-color: var(--syracuse-blue);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    
+    button:hover {
+      background-color: #002277;
+      transform: scale(1.05);
+    }
+    
+    .bingo-board {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-gap: 10px;
+      max-width: 600px;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    
+    .bingo-cell {
+      position: relative;
+      aspect-ratio: 1/1;
+      background-color: white;
+      border: 2px solid var(--syracuse-blue);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 5px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+      font-size: 14px;
+      overflow: hidden;
+    }
+    
+    .bingo-cell:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .bingo-cell.visited {
+      background-color: var(--syracuse-orange);
+      color: white;
+    }
+    
+    .bingo-cell.visited::after {
+      content: "✔️";
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      font-size: 18px;
+    }
+    
+    .bingo-cell.free {
+      background-color: var(--syracuse-blue);
+      color: white;
+      font-weight: bold;
+    }
+    
+    .building-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .building-info {
+      font-size: 12px;
+      line-height: 1.2;
+    }
+    
+    .win-message {
+      opacity: 0;
+      background-color: var(--syracuse-orange);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      animation: fadeIn 1s forwards, pulse 1.5s infinite;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #f0f;
+      top: 0;
+      z-index: 1000;
+      animation: fall linear forwards;
+    }
+    
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .bingo-cell {
+        font-size: 12px;
+      }
+      
+      .building-info {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Syracuse University Campus Bingo</h1>
+  <p class="subtitle">Explore the campus and mark off buildings as you visit them!</p>
+  
+  <div class="instructions">
+    <h3>How to Play:</h3>
+    <ol>
+      <li>Visit buildings around the Syracuse University campus</li>
+      <li>Click/tap on each square when you've visited that location</li>
+      <li>Try to get 5 in a row (horizontally, vertically, or diagonally) to win!</li>
+      <li>Use the "Reset Board" button to clear selections</li>
+      <li>Press "New Board" for a different arrangement of buildings</li>
+    </ol>
+  </div>
+  
+  <div class="bingo-container">
+    <div class="controls">
+      <button id="reset-btn">Reset Board</button>
+      <button id="new-board-btn">New Board</button>
+    </div>
+    
+    <div class="bingo-board" id="bingo-board"></div>
+    
+    <div class="win-message" id="win-message">
+      BINGO! You've explored Syracuse University!
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const buildings = [
+        { name: "Carrier Dome", info: "Syracuse's 49,000-seat stadium for sports and events" },
+        { name: "Bird Library", info: "Main campus library with 6 floors of resources" },
+        { name: "Hall of Languages", info: "Iconic building & oldest on campus (1873)" },
+        { name: "Schine Student Center", info: "Campus hub with dining, lounges & bookstore" },
+        { name: "Crouse College", info: "Gothic-style building housing music programs" },
+        { name: "Hendricks Chapel", info: "Interfaith chapel in the heart of campus" },
+        { name: "Whitman School", info: "Business school with modern facilities" },
+        { name: "Newhouse Complex", info: "Communications school with professional studios" },
+        { name: "Life Sciences Complex", info: "State-of-the-art science research facilities" },
+        { name: "Maxwell Hall", info: "Home to citizenship & public affairs programs" },
+        { name: "Link Hall", info: "Engineering & Computer Science building" },
+        { name: "Ernie Davis Hall", info: "Modern residence hall with dining facilities" },
+        { name: "Goldstein Alumni Center", info: "Alumni headquarters on campus" },
+        { name: "Flanagan Gymnasium", info: "Recreation center with fitness equipment" },
+        { name: "Manley Field House", info: "Athletic complex for sports practice" },
+        { name: "Lawrinson Hall", info: "21-story residence tower with great views" },
+        { name: "Shaffer Art Building", info: "Home to art galleries and studios" },
+        { name: "Lyman Hall", info: "Houses biology labs and classrooms" },
+        { name: "Bowne Hall", info: "Historic building with classical architecture" },
+        { name: "Huntington Beard Crouse", info: "Houses humanities departments" },
+        { name: "Archbold Gymnasium", info: "Historic gym and fitness facility" },
+        { name: "Carnegie Library", info: "Houses science and technology collections" },
+        { name: "Center for Science & Technology", info: "Modern research and teaching facility" },
+        { name: "Syracuse Stage", info: "Professional theater complex" }
+      ];
+      
+      const bingoBoard = document.getElementById('bingo-board');
+      const resetBtn = document.getElementById('reset-btn');
+      const newBoardBtn = document.getElementById('new-board-btn');
+      const winMessage = document.getElementById('win-message');
+      
+      // Shuffle array
+      function shuffleArray(array) {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
+      }
+      
+      // Create the bingo board
+      function createBingoBoard() {
+        bingoBoard.innerHTML = '';
+        // Get 24 random buildings
+        const shuffledBuildings = shuffleArray(buildings).slice(0, 24);
+        // Insert free space in the middle (index 12)
+        const boardItems = [
+          ...shuffledBuildings.slice(0, 12),
+          { name: "FREE SPACE", info: "Quad at the heart of campus" },
+          ...shuffledBuildings.slice(12)
+        ];
+        
+        boardItems.forEach((building, index) => {
+          const cell = document.createElement('div');
+          cell.className = 'bingo-cell';
+          // Mark free space as visited and style it specially
+          if (index === 12) {
+            cell.classList.add('free');
+            cell.classList.add('visited');
+          }
+          
+          const nameElement = document.createElement('div');
+          nameElement.className = 'building-name';
+          nameElement.textContent = building.name;
+          
+          const infoElement = document.createElement('div');
+          infoElement.className = 'building-info';
+          infoElement.textContent = building.info;
+          
+          cell.appendChild(nameElement);
+          cell.appendChild(infoElement);
+          
+          cell.addEventListener('click', () => {
+            // Toggle visited state (except free space)
+            if (!cell.classList.contains('free')) {
+              cell.classList.toggle('visited');
+              checkForWin();
+            }
+          });
+          
+          bingoBoard.appendChild(cell);
+        });
+        
+        // Hide win message on new board creation
+        winMessage.style.opacity = '0';
+      }
+      
+      // Reset board (clear selections, except the free space)
+      function resetBoard() {
+        const cells = bingoBoard.querySelectorAll('.bingo-cell');
+        cells.forEach((cell, index) => {
+          if (!cell.classList.contains('free')) {
+            cell.classList.remove('visited');
+          }
+        });
+        winMessage.style.opacity = '0';
+      }
+      
+      // Check winning conditions
+      function checkForWin() {
+        const cells = Array.from(bingoBoard.querySelectorAll('.bingo-cell'));
+        const visitedCells = cells.map(cell => cell.classList.contains('visited'));
+        
+        // Helper: check line based on start index, step and count
+        function checkLine(startIndex, step, count) {
+          for (let i = 0; i < count; i++) {
+            if (!visitedCells[startIndex + i * step]) return false;
+          }
+          return true;
+        }
+        
+        // Check rows
+        for (let row = 0; row < 5; row++) {
+          if (checkLine(row * 5, 1, 5)) {
+            triggerWin();
+            return;
+          }
+        }
+        // Check columns
+        for (let col = 0; col < 5; col++) {
+          if (checkLine(col, 5, 5)) {
+            triggerWin();
+            return;
+          }
+        }
+        // Check diagonals
+        if (checkLine(0, 6, 5) || checkLine(4, 4, 5)) {
+          triggerWin();
+          return;
+        }
+      }
+      
+      // Trigger win: display message and start confetti effect
+      function triggerWin() {
+        winMessage.style.opacity = '1';
+        createConfetti();
+      }
+      
+      // Create confetti effect
+      function createConfetti() {
+        const colors = ['#D44500', '#0033A0', '#fff', '#ffcc00'];
+        for (let i = 0; i < 100; i++) {
+          setTimeout(() => {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            const left = Math.random() * 100;
+            const size = Math.random() * 10 + 5;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.left = `${left}vw`;
+            confetti.style.width = `${size}px`;
+            confetti.style.height = `${size}px`;
+            confetti.style.backgroundColor = color;
+            confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
+            document.body.appendChild(confetti);
+            setTimeout(() => {
+              confetti.remove();
+            }, 5000);
+          }, i * 50);
+        }
+      }
+      
+      // Event listeners for buttons
+      resetBtn.addEventListener('click', resetBoard);
+      newBoardBtn.addEventListener('click', createBingoBoard);
+      
+      // Initialize board on page load
+      createBingoBoard();
+    });
+  </script>
+</body>
+</html>
