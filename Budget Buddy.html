@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Budget Buddies</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #f7f7f7;
+      --card: #e2e2e2;
+      --accent: #d3d3d3;
+      --text-main: #111;
+      --text-muted: #555;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* Phone frame */
+    #app {
+      width: 100%;
+      max-width: 430px;
+      height: 100vh;
+      max-height: 900px;
+      background: var(--bg);
+      border-radius: 24px;
+      box-shadow: 0 0 0 10px #000, 0 20px 50px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen {
+      display: none;
+      flex: 1;
+      padding: 24px 24px 32px;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      text-align: center;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .spacer {
+      flex: 1;
+    }
+
+    .input-group {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: none;
+      background: #ececec;
+      font-size: 15px;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .primary-btn,
+    .gray-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .gray-btn {
+      background: var(--card);
+    }
+
+    .back-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .back-btn {
+      background: transparent;
+      padding: 4px 0;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .back-arrow {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* Skill level buttons */
+
+    .skill-container {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .skill-btn {
+      background: var(--card);
+      padding: 14px 10px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .skill-btn h3 {
+      margin-bottom: 4px;
+    }
+
+    .skill-btn p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Levels screen */
+
+    .levels-column {
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 0 40px;
+    }
+
+    .level-pill {
+      position: relative;
+      height: 28px;
+      border-radius: 999px;
+      background: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    .level-pill.active {
+      background: #d0d0d0;
+      color: var(--text-main);
+      opacity: 1;
+    }
+
+    .levels-footer {
+      margin-top: auto;
+      padding-top: 16px;
+    }
+
+    /* Lesson intro */
+
+    .lesson-main {
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .lesson-number {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .lesson-question {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .lesson-topic {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 32px;
+    }
+
+    /* Game screen */
+
+    .top-progress {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .progress-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-align: right;
+    }
+
+    .progress-bar {
+      width: 150px;
+      height: 8px;
+      border-radius: 4px;
+      background: #e0e0e0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 25%;
+      background: #c4c4c4;
+    }
+
+    .buddy-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .speech-bubble {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 13px;
+      position: relative;
+      max-width: 210px;
+    }
+
+    .speech-bubble::after {
+      content: "";
+      position: absolute;
+      left: -10px;
+      top: 18px;
+      width: 0;
+      height: 0;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-right: 10px solid var(--card);
+    }
+
+    /* Buddy character – simple shapes */
+
+    .buddy {
+      width: 80px;
+    }
+
+    .buddy-head {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #d0d0d0;
+      margin: 0 auto 4px;
+    }
+
+    .buddy-body {
+      width: 40px;
+      height: 70px;
+      border-radius: 8px;
+      background: #d0d0d0;
+      margin: 0 auto;
+    }
+
+    .buddy-arms {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .buddy-arm {
+      width: 12px;
+      height: 40px;
+      border-radius: 8px;
+      background: #d0d0d0;
+    }
+
+    .state-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 24px;
+    }
+
+    .round-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .caption {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- LOGIN SCREEN -->
+    <section id="screen-login" class="screen active">
+      <div class="spacer"></div>
+      <div class="center">
+        <div class="title">Budget Buddies</div>
+        <div class="subtitle">Save Your Progress!</div>
+      </div>
+
+      <div class="input-group">
+        <input id="name-input" type="text" placeholder="Name" />
+        <input id="email-input" type="email" placeholder="Email" />
+        <input id="password-input" type="password" placeholder="Password" />
+      </div>
+
+      <div style="margin-top: 28px;">
+        <button class="primary-btn" id="login-btn">Log In</button>
+      </div>
+
+      <div class="spacer"></div>
+    </section>
+
+    <!-- SKILL LEVEL SCREEN -->
+    <section id="screen-skill" class="screen">
+      <div class="spacer" style="flex:0.1;"></div>
+
+      <h2 class="title">Skill Level</h2>
+      <p class="subtitle center">
+        How knowledgeable are you<br />with financial literacy?
+      </p>
+
+      <div class="skill-container">
+        <button class="skill-btn" data-skill="beginner">
+          <h3>Beginner</h3>
+          <p>I don’t know anything!</p>
+        </button>
+
+        <button class="skill-btn" data-skill="intermediate">
+          <h3>Intermediate</h3>
+          <p>I am familiar with some topics!</p>
+        </button>
+
+        <button class="skill-btn" data-skill="advanced">
+          <h3>Advanced</h3>
+          <p>I want to learn very complex topics!</p>
+        </button>
+      </div>
+
+      <div class="spacer"></div>
+    </section>
+
+    <!-- LEVELS SCREEN -->
+    <section id="screen-levels" class="screen">
+      <div class="back-row">
+        <button class="back-btn" id="back-to-skill">
+          <span class="back-arrow">←</span> Back
+        </button>
+      </div>
+
+      <h2 class="title">Start Your Lesson!</h2>
+
+      <div class="levels-column" id="levels-list">
+        <!-- levels injected by JS -->
+      </div>
+
+      <div class="levels-footer">
+        <button class="primary-btn" id="continue-from-levels">Continue</button>
+      </div>
+    </section>
+
+    <!-- LESSON INTRO SCREEN -->
+    <section id="screen-lesson-intro" class="screen">
+      <div class="back-row">
+        <button class="back-btn" id="back-to-levels">
+          <span class="back-arrow">←</span> Back
+        </button>
+      </div>
+
+      <div class="lesson-main">
+        <div id="lesson-number" class="lesson-number">LESSON 1</div>
+        <div class="lesson-question">What Will You Learn Today?</div>
+        <div id="lesson-topic" class="lesson-topic">Filing Taxes!</div>
+
+        <button class="primary-btn" id="start-lesson-btn">Start</button>
+      </div>
+
+      <div class="spacer"></div>
+    </section>
+
+    <!-- GAME SCREEN -->
+    <section id="screen-game" class="screen">
+      <div class="top-progress">
+        <button class="back-btn" id="back-to-levels-from-game">
+          <span class="back-arrow">←</span> Back
+        </button>
+
+        <div>
+          <div class="progress-label">Progress</div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="buddy-row">
+        <div class="buddy">
+          <div class="buddy-head"></div>
+          <div class="buddy-body"></div>
+          <div class="buddy-arms">
+            <div class="buddy-arm"></div>
+            <div class="buddy-arm"></div>
+          </div>
+        </div>
+
+        <div class="speech-bubble">
+          Hey there! I’m Buddy. Please enter the state you live in so I can
+          tell you more about their taxes!
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="caption" id="skill-caption"></div>
+
+      <div class="state-row">
+        <input
+          type="text"
+          id="state-input"
+          placeholder="My State is..."
+          style="flex: 1;"
+        />
+        <button class="round-btn" id="state-next-btn">➜</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Simple app state
+    const state = {
+      skillLevel: null,
+      level: 1,
+      totalLevels: 8,
+    };
+
+    // Helper: show only one screen
+    function showScreen(id) {
+      document
+        .querySelectorAll(".screen")
+        .forEach((el) => el.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    // LOGIN
+    document.getElementById("login-btn").addEventListener("click", () => {
+      // you could validate name/email/pass here if you want
+      showScreen("screen-skill");
+    });
+
+    // SKILL LEVEL SELECTION
+    document.querySelectorAll(".skill-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.skillLevel = btn.dataset.skill;
+        buildLevels();
+        showScreen("screen-levels");
+        updateSkillCaption();
+      });
+    });
+
+    // BUILD LEVEL PILL UI
+    function buildLevels() {
+      const list = document.getElementById("levels-list");
+      list.innerHTML = "";
+      for (let i = 1; i <= state.totalLevels; i++) {
+        const pill = document.createElement("button");
+        pill.className =
+          "level-pill" + (i === state.level ? " active" : "");
+        pill.textContent = i;
+        pill.addEventListener("click", () => {
+          state.level = i;
+          buildLevels();
+          updateLessonIntro();
+        });
+        list.appendChild(pill);
+      }
+      updateLessonIntro();
+    }
+
+    // UPDATE LESSON INTRO TEXT
+    function updateLessonIntro() {
+      const num = document.getElementById("lesson-number");
+      const topic = document.getElementById("lesson-topic");
+      num.textContent = `LESSON ${state.level}`;
+
+      // Simple topics per level (you can tweak)
+      const topics = [
+        "Filing Taxes!",
+        "Budgeting Basics",
+        "Understanding Interest",
+        "Credit Scores",
+        "Loans & Debt",
+        "Saving & Investing",
+        "Insurance Basics",
+        "Long-Term Goals",
+      ];
+      topic.textContent = topics[state.level - 1] || "Filing Taxes!";
+    }
+
+    // BACK BUTTONS
+    document
+      .getElementById("back-to-skill")
+      .addEventListener("click", () => showScreen("screen-skill"));
+    document
+      .getElementById("back-to-levels")
+      .addEventListener("click", () => showScreen("screen-levels"));
+    document
+      .getElementById("back-to-levels-from-game")
+      .addEventListener("click", () => showScreen("screen-levels"));
+
+    // CONTINUE FROM LEVELS
+    document
+      .getElementById("continue-from-levels")
+      .addEventListener("click", () => {
+        updateLessonIntro();
+        showScreen("screen-lesson-intro");
+      });
+
+    // START LESSON → GAME
+    document
+      .getElementById("start-lesson-btn")
+      .addEventListener("click", () => {
+        updateProgressBar();
+        showScreen("screen-game");
+      });
+
+    // PROGRESS BAR BASED ON LEVEL
+    function updateProgressBar() {
+      const fill = document.getElementById("progress-fill");
+      const pct = state.level / state.totalLevels;
+      fill.style.width = `${pct * 100}%`;
+    }
+
+    // SKILL CAPTION BELOW GAME
+    function updateSkillCaption() {
+      const el = document.getElementById("skill-caption");
+      if (!state.skillLevel) {
+        el.textContent = "";
+        return;
+      }
+      const map = {
+        beginner: "You chose Beginner: Buddy will keep things nice and simple.",
+        intermediate:
+          "You chose Intermediate: Buddy will give you some deeper tips.",
+        advanced:
+          "You chose Advanced: Buddy will talk about more complex details.",
+      };
+      el.textContent = map[state.skillLevel] || "";
+    }
+
+    // STATE NEXT BUTTON
+    document
+      .getElementById("state-next-btn")
+      .addEventListener("click", () => {
+        const value = document.getElementById("state-input").value.trim();
+        if (!value) {
+          alert("Please enter a state to continue!");
+          return;
+        }
+        alert(
+          `Nice! In a real app, Buddy would now show tax info for: ${value}.`
+        );
+      });
+
+    // Initial levels build
+    buildLevels();
+    updateSkillCaption();
+  </script>
+</body>
+</html>
